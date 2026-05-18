@@ -1,1 +1,1 @@
-#IdeaVault Server - IdeaVault Backend
+IdeaVault Server - IdeaVault Backend
