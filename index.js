@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 dotenv.config();
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 
 const mongodburi = process.env.MONGO_URI;
 
@@ -29,6 +30,32 @@ async function run() {
         const db = client.db('ideavault');
         const ideaCollection = db.collection('ideas');
 
+        const JWKS = createRemoteJWKSet(
+            new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
+        );
+
+        // Verify Token
+        const verifyToken = async (request, response, next) => {
+            const authHeader = request.headers.authorization;
+            if (!authHeader) {
+                response.status(401).json({message: "Unauthorized"});
+            }
+            
+            const token = authHeader.split(" ")[1];
+
+            if (!token) {
+                response.status(401).json({ message: "Unauthorized" });
+            }
+
+            try {
+                const { payload } = await jwtVerify(token, JWKS);
+                console.log(payload);
+                next()
+            } catch (error) {
+                return response.status(403).json({message:"forbidden"})
+            }
+        }
+
         // Find all idea
         app.get('/idea', async (request, response) => {
             const result = await ideaCollection.find().toArray();
@@ -36,7 +63,7 @@ async function run() {
         })
 
         // Insert single idea
-        app.post('/idea', async (request, response) => {
+        app.post('/idea', verifyToken, async (request, response) => {
             const ideaData = request.body;
             const result = await ideaCollection.insertOne(ideaData);
             response.json(result);
