@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dotenv.config();
 const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 
@@ -69,7 +69,12 @@ async function run() {
             response.json(result);
         })
 
-
+        // Find single idea
+        app.get('/idea/:ideaId', verifyToken, async (request, response) => {
+            const { ideaId } = request.params;
+            const result = await ideaCollection.findOne({ _id: new ObjectId(ideaId) });
+            response.json(result);
+        })
 
 
         // Send a ping to confirm a successful connection
