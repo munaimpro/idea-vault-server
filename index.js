@@ -29,6 +29,7 @@ async function run() {
         // Create database and idea collection
         const db = client.db('ideavault');
         const ideaCollection = db.collection('ideas');
+        const commentsCollection = db.collection('comments');
 
         const JWKS = createRemoteJWKSet(
             new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
@@ -73,6 +74,13 @@ async function run() {
         app.get('/idea/:ideaId', verifyToken, async (request, response) => {
             const { ideaId } = request.params;
             const result = await ideaCollection.findOne({ _id: new ObjectId(ideaId) });
+            response.json(result);
+        })
+
+        // Find all comments for singe idea
+        app.get('/comment/:ideaId', async (request, response) => {
+            const { ideaId } = request.params;
+            const result = await commentsCollection.find({ ideaId: new ObjectId(ideaId) }).toArray();
             response.json(result);
         })
 
