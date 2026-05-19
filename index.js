@@ -80,7 +80,28 @@ async function run() {
         // Find all comments for singe idea
         app.get('/comment/:ideaId', async (request, response) => {
             const { ideaId } = request.params;
-            const result = await commentsCollection.find({ ideaId: new ObjectId(ideaId) }).toArray();
+            console.log("Fetching comments for ideaId:", ideaId);
+            const result = await commentsCollection.find({ ideaId: ideaId }).toArray();
+            response.json(result);
+        })
+
+        // Insert single comment
+        app.post('/comment', verifyToken, async (request, response) => {
+            const commentData = request.body;
+            const finalCommentData = {
+                ...commentData,
+                ideaId: new ObjectId(commentData.ideaId),
+                createdAt: new Date()
+            };
+            const result = await commentsCollection.insertOne(commentData);
+            response.json(result);
+        })
+
+        // Find all ideas for posted by a single user
+        app.get('/diea/:userId', async (request, response) => {
+            const { userId } = request.params;
+            console.log("Fetching ideas for userId:", ideaId);
+            const result = await ideasCollection.find({ userId: userId }).toArray();
             response.json(result);
         })
 
