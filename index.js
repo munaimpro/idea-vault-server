@@ -98,19 +98,31 @@ async function run() {
         })
 
         // Find all ideas for posted by a single user
-        app.get('/idea-by-user/:userId', verifyToken, async (request, response) => {
+        app.get('/idea-by-user/:userId', async (request, response) => {
             const { userId } = request.params;
             const result = await ideaCollection.find({ userId: userId }).toArray();
             response.json(result);
         })
 
-        // Delete destination data
-        app.delete('/idea/:ideaId', verifyToken, async (request, response) => {
+        // Delete single idea
+        app.delete('/idea/:ideaId', async (request, response) => {
             const { ideaId } = request.params;
             console.log(ideaId);
             const result = await ideaCollection.deleteOne({ _id: new ObjectId(ideaId) });
             response.json(result);
         })
+
+        // Update single idea details
+        app.patch('/update-idea/:ideaId', verifyToken, async (request, response) => {
+            const { ideaId } = request.params;
+            const updatedData = request.body;
+            console.log(ideaId);
+            const result = await ideaCollection.updateOne(
+                { _id: new ObjectId(ideaId) },
+                { $set: updatedData }
+            );
+            response.json(result);
+        });
 
 
         // Send a ping to confirm a successful connection
