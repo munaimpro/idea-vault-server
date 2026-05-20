@@ -156,12 +156,19 @@ async function run() {
         });
 
         // Delete single comment
-        app.delete('/comment/:commentId', async (request, response) => {
+        app.delete('/comment/:commentId', verifyToken, async (request, response) => {
             const { commentId } = request.params;
             console.log(commentId);
             const result = await commentsCollection.deleteOne({ _id: new ObjectId(commentId) });
             response.json(result);
         })
+
+        // Find short list of ideas for homepage
+        app.get('/trending-idea', async (request, response) => {
+            const result = await ideaCollection.find().limit(6).toArray();
+            response.json(result);
+        });
+
 
 
         // Send a ping to confirm a successful connection
