@@ -98,10 +98,17 @@ async function run() {
         })
 
         // Find all ideas for posted by a single user
-        app.get('/diea/:userId', async (request, response) => {
+        app.get('/idea-by-user/:userId', verifyToken, async (request, response) => {
             const { userId } = request.params;
-            console.log("Fetching ideas for userId:", ideaId);
-            const result = await ideasCollection.find({ userId: userId }).toArray();
+            const result = await ideaCollection.find({ userId: userId }).toArray();
+            response.json(result);
+        })
+
+        // Delete destination data
+        app.delete('/idea/:ideaId', verifyToken, async (request, response) => {
+            const { ideaId } = request.params;
+            console.log(ideaId);
+            const result = await ideaCollection.deleteOne({ _id: new ObjectId(ideaId) });
             response.json(result);
         })
 
