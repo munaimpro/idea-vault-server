@@ -124,6 +124,45 @@ async function run() {
             response.json(result);
         });
 
+        // Find all idea commented by a user
+        app.get('/commented-idea/:userId', async (request, response) => {
+            const { userId } = request.params;
+
+            // Find user all comments by this user
+            const comments = await commentsCollection.find({ userId }).toArray();
+            
+            // Extracting unique idea ids
+            const ideaIds = [
+                ...new Set(
+                    comments.map(comment => new ObjectId(comment.ideaId))
+                )
+            ];
+
+            // Find commented ideas
+            const result = await ideaCollection.find({_id: { $in: ideaIds } }).toArray();
+            response.send(result);
+        });
+
+        // Update single comment
+        app.put('/comment/:commentId', async (request, response) => {
+            const { commentId } = request.params;
+            const updatedData = request.body;
+            console.log(commentId);
+            const result = await commentsCollection.updateOne(
+                { _id: new ObjectId(commentId) },
+                { $set: updatedData }
+            );
+            response.json(result);
+        });
+
+        // Delete single comment
+        app.delete('/comment/:commentId', async (request, response) => {
+            const { commentId } = request.params;
+            console.log(commentId);
+            const result = await commentsCollection.deleteOne({ _id: new ObjectId(commentId) });
+            response.json(result);
+        })
+
 
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
