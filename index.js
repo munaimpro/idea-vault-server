@@ -58,10 +58,41 @@ async function run() {
         }
 
         // Find all idea
+        // app.get('/idea', async (request, response) => {
+        //     const result = await ideaCollection.find().toArray();
+        //     response.json(result);
+        // })
+
+        // Find all ideas with Search and Filters
         app.get('/idea', async (request, response) => {
-            const result = await ideaCollection.find().toArray();
-            response.json(result);
-        })
+                const { search, category, startDate, endDate } = request.query;
+                let query = {};
+
+                // Title Search
+                if (search) {
+                    query.title = { $regex: search, $options: 'i' };
+                }
+
+                // Category Filter
+                if (category) {
+                    query.category = category;
+                }
+
+                // Date Range Filter
+                if (startDate || endDate) {
+                    query.createdAt = {};
+                    if (startDate) {
+                        query.createdAt.$gte = new Date(startDate);
+                    }
+                    if (endDate) {
+                        const end = new Date(endDate);
+                        query.createdAt.$lte = end;
+                    }
+                }
+
+                const result = await ideaCollection.find(query).toArray();
+                response.json(result);
+        });
 
         // Insert single idea
         app.post('/idea', verifyToken, async (request, response) => {
